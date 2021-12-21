@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "decentralized-lottery"
+version = "0.1.0"
+description = "Learn how to build lottery on smart contract"
+authors = ["Prem Chotepanit <prem.ch@ku.th>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+eth-brownie = "1.17.0"
+pre-commit = "2.16.0"
+black = "21.9b0"
+web3 = "5.24.0"
+py-solc-x = "1.1.1"
+python-dotenv = "0.16.0"
+vyper = {version="0.3.0", python="3.8"}
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
