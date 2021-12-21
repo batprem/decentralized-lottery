@@ -18,7 +18,12 @@ contract Lottery {
         players.push(msg.sender);
     }
 
-    function getEntracnFee() public {}
+    function getEntranceFee() public returns (uint256) {
+        (, int256 price, , , ) = ethUsdPriceFeed.latestRoundData();
+        uint256 adjustedPrice = uint256(price) * 10 * 10; // 18 decimals
+        uint256 costToEnter = (usdEntryFee * 10**18) / uint256(price);
+        return costToEnter;
+    }
 
     function startLottery() public {}
 
