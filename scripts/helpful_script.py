@@ -1,0 +1,78 @@
+from brownie import (
+    accounts,
+    config,
+    network,
+    MockV3Aggregator,
+    Contract,
+    VRFCoordinatorMock,
+    LinkToken,
+)
+from web3 import Web3
+
+
+FORKED_LOCAL_ENVIRONMENTS = ["mainnet-fork", "mainnet-fork-dev"]
+LOCAL_BLOCKCHAIN_ENVIRONMENTS = ["development", "ganache-local", "ganache-local-2"]
+
+
+DECIMALS = 8
+STARTING_PRICE = 2e8
+
+
+def get_account(index=None, account_id=None):
+    active_network = network.show_active()
+    if index:
+        return accounts[index]
+    if account_id:
+        return accounts.load(account_id)
+    if (
+        active_network in LOCAL_BLOCKCHAIN_ENVIRONMENTS
+        or active_network in FORKED_LOCAL_ENVIRONMENTS
+    ):
+        return accounts[0]
+    else:
+        return accounts.add(config["wallet"]["from_key"])
+
+
+contract_to_mock = {
+    "eth_usd_price_feed": MockV3Aggregator,
+    "vrf_coordinator": VRFCoordinatorMock,
+    "link_token": LinkToken,
+}
+
+
+def get_contract(contract_name):
+    """
+    This function will grab the contract address from the brownie config
+
+    Args:
+        contract_name (string)
+    Returns:
+        brownie.network.contract.ProjectContract
+    """
+    contract_type = contract_to_mock[contract_name]
+    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        if len(contract_type) <= 0:
+            deploy_mocks()
+        contract = contract_type[-1]
+    else:
+        contract_address = config["networks"][network.show_active()][contract_name]
+        # address
+        # ABI
+        contract = Contract.from_abi(
+            contract_type._name, contract_address, contract_type.abi
+        )
+    return contract
+
+
+def deploy_mocks():
+    account = get_account()
+    print(f"The active network is {network.show_active()}")
+    print("Deploying Mock...")
+
+    MockV3Aggregator.deploy(
+        DECIMALS, Web3.toWei(STARTING_PRICE, "ether"), {"from": account}
+    )
+    link_token = LinkToken.deploy({"from": account})
+
+    VRFCoordinatorMock.deploy(link_token.address, {"from": account})
+    print("Mocks deployed")
