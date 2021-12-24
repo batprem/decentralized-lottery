@@ -14,6 +14,7 @@ web3 = "5.24.0"
 py-solc-x = "1.1.1"
 python-dotenv = "0.16.0"
 vyper = {version="0.3.0", python="3.8"}
+jupyter = "1.0.0"
 [tool.poetry.dev-dependencies]
 
 [build-system]
