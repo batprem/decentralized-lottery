@@ -51,13 +51,16 @@ def get_contract(contract_name):
     Returns:
         brownie.network.contract.ProjectContract
     """
+    active_network = network.show_active()
     contract_type = contract_to_mock[contract_name]
-    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+    if active_network in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        # Note that Local networks do not contain chain link contract address by default
+        # we need to monk them up
         if len(contract_type) <= 0:
             deploy_mocks()
         contract = contract_type[-1]
     else:
-        contract_address = config["networks"][network.show_active()][contract_name]
+        contract_address = config["networks"][active_network][contract_name]
         # address
         # ABI
         contract = Contract.from_abi(
@@ -67,6 +70,9 @@ def get_contract(contract_name):
 
 
 def deploy_mocks():
+    """
+    Deploy mock contract
+    """
     account = get_account()
     print(f"The active network is {network.show_active()}")
     print("Deploying Mock...")
@@ -86,6 +92,10 @@ def fund_contract_with_link(
     link_token: Contract = None,
     amount: int = 0.1e18,
 ):
+    """
+    Contract which call external API need link token for request
+    As a result, we first need to fund contract with link token
+    """
     account = account if account else get_account()
     link_token = link_token if link_token else get_contract("link_token")
     # tx = link_token.transfer(contract_address, amount, {"from", amount})
