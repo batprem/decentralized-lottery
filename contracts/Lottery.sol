@@ -5,6 +5,11 @@ import "@chainlink/contracts/src/v0.6/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.6/VRFConsumerBase.sol";
 
+// VRF: Verifiable Random Function (https://docs.chain.link/docs/chainlink-vrf/)
+// Ownable: The Ownable. sol contract provides the most basic single account ownership to a contract
+// (https://www.oreilly.com/library/view/mastering-blockchain-programming/9781839218262/ed3ed525-3e01-4eb8-8bd6-7a0106bb3cb0.xhtml)
+// In this case, ownable provides `OnlyOwner` function
+
 contract Lottery is VRFConsumerBase, Ownable {
     address payable[] public players;
     address payable public recentWinner;
@@ -16,14 +21,14 @@ contract Lottery is VRFConsumerBase, Ownable {
         CLOSED,
         CALCULATING_WINNER
     }
+    // OPEN: 0
+    // CLOSED: 1
+    // CALCULATING_WINNER: 2
     LOTTERY_STATE public lottery_state;
     uint256 public fee;
     bytes32 public keyhash;
     event RequestedRandomness(bytes32 requestId);
 
-    // OPEN: 0
-    // CLOSED: 1
-    // CALCULATING_WINNER: 2
 
     constructor(
         address _priceFeedAddress,
@@ -68,7 +73,7 @@ contract Lottery is VRFConsumerBase, Ownable {
     function endLottery() public onlyOwner {
         lottery_state = LOTTERY_STATE.CALCULATING_WINNER;
         bytes32 requestId = requestRandomness(keyhash, fee); // Auto return byte32 requestId
-        emit RequestedRandomness(requestId);
+        emit RequestedRandomness(requestId); // Append log RequestedRandomness event into blockchain (https://rinkeby.etherscan.io/tx/0xa5c1017f3ec328a0f6c53d909ef30716ee304338974da660207cc94ffd8912c1#eventlog)
     }
 
     function fulfillRandomness(bytes32 _requestId, uint256 _randomness)
@@ -82,7 +87,7 @@ contract Lottery is VRFConsumerBase, Ownable {
         require(_randomness > 0, "random-not-found");
         uint256 indexOfWinder = _randomness % players.length;
         recentWinner = players[indexOfWinder];
-        // Pay winnder
+        // Pay winner
         recentWinner.transfer(address(this).balance);
 
         // Reset
