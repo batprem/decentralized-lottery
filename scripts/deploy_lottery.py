@@ -50,7 +50,7 @@ def end_lottery():
     ending_transaction.wait(1)
     time.sleep(180)
     print(f"{lottery.recentWinner()} is the new winner!")
-    # tx =
+
 
 
 def main():

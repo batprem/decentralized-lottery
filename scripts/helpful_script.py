@@ -57,6 +57,7 @@ def get_contract(contract_name):
         # Note that Local networks do not contain chain link contract address by default
         # we need to monk them up
         if len(contract_type) <= 0:
+            # Get the latest deployed contract, deploy one if doesn't exist
             deploy_mocks()
         contract = contract_type[-1]
     else:
